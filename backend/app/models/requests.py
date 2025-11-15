@@ -29,9 +29,9 @@ class StateDeforestationRequest(BaseModel):
 
 class ComparisonRequest(BaseModel):
     """Request para comparação temporal"""
-    state: str = Field(
+    state_or_biome: str = Field(
         ...,
-        description="Nome do estado ou 'Brasil' para agregado",
+        description="Nome do estado, bioma ou 'Brasil' para agregado",
         example="Amazonas"
     )
     year_start: int = Field(
@@ -55,10 +55,10 @@ class ComparisonRequest(BaseModel):
             raise ValueError("year_end deve ser maior que year_start")
         return v
     
-    @validator('state')
-    def validate_state(cls, v):
+    @validator('state_or_biome')
+    def validate_entity(cls, v):
         if not v or not v.strip():
-            raise ValueError("Estado não pode ser vazio")
+            raise ValueError("Estado/Bioma não pode ser vazio")
         return v.strip()
 
 
@@ -79,5 +79,21 @@ class RankingRequest(BaseModel):
         10,
         description="Número de estados no ranking",
         ge=1,
-        le=20
+        le=30
+    )
+    biome: Optional[str] = Field(
+        None,
+        description="Filtrar por bioma (opcional)",
+        example="Amazônia"
+    )
+
+
+class BiomeComparisonRequest(BaseModel):
+    """NOVA: Request para comparação de biomas"""
+    year: int = Field(
+        ...,
+        description="Ano da comparação",
+        ge=2020,
+        le=2024,
+        example=2024
     )

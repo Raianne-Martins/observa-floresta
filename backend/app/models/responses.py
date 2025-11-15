@@ -93,3 +93,27 @@ class ErrorResponse(BaseModel):
     detail: str
     status_code: int
     timestamp: str
+
+
+class BiomeData(BaseModel):
+    """Dados de um bioma"""
+    biome: str
+    area_km2: float
+    percentage_of_total: float
+    num_states: int
+
+
+class BiomeComparisonResponse(BaseModel):
+    """NOVA: Response de comparação de biomas"""
+    year: int
+    total_brazil_km2: float
+    biomes: List[BiomeData]
+    data_source: str
+    timestamp: str
+
+
+class BiomesListResponse(BaseModel):
+    """NOVA: Response de lista de biomas"""
+    biomes: List[str]
+    total: int
+    timestamp: str

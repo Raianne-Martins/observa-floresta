@@ -109,21 +109,28 @@ async def get_state_deforestation_get(
     "/deforestation/compare",
     response_model=ComparisonResponse,
     summary="Comparar desmatamento entre períodos",
-    description="Compara desmatamento de um estado entre dois anos",
+    description="Compara desmatamento de um estado, bioma ou Brasil entre dois anos",
     tags=["Ações Principais"]
 )
 async def compare_deforestation_post(
     request: ComparisonRequest,
     service: DeforestationService = Depends(get_deforestation_service)
 ):
-    """Ação 2: Comparar Desmatamento Temporal"""
+    """
+    Ação 2: Comparar Desmatamento Temporal
+    
+    Agora suporta:
+    - Estados específicos (ex: "Pará")
+    - Biomas (ex: "Cerrado", "Amazônia")
+    - Brasil inteiro (use "Brasil")
+    """
     try:
         logger.info(
-            f"POST /deforestation/compare: {request.state}, "
+            f"POST /deforestation/compare: {request.state_or_biome}, "
             f"{request.year_start}-{request.year_end}"
         )
         result = await service.compare_deforestation(
-            state=request.state,
+            state_or_biome=request.state_or_biome,
             year_start=request.year_start,
             year_end=request.year_end
         )
@@ -143,29 +150,36 @@ async def compare_deforestation_post(
 
 
 @router.get(
-    "/deforestation/compare/{state}",
+    "/deforestation/compare/{state_or_biome}",
     response_model=ComparisonResponse,
     summary="Comparar desmatamento entre períodos (GET)",
-    description="Versão GET do endpoint de comparação temporal",
+    description="Versão GET - suporta estado, bioma ou Brasil",
     tags=["Ações Principais"]
 )
 async def compare_deforestation_get(
-    state: str,
+    state_or_biome: str,
     year_start: int = Query(..., ge=2020, le=2024),
     year_end: int = Query(..., ge=2020, le=2024),
     service: DeforestationService = Depends(get_deforestation_service)
 ):
-    """Ação 2: Comparar Desmatamento Temporal (GET)"""
+    """
+    Ação 2: Comparar Desmatamento Temporal (GET)
+    
+    **Exemplos:**
+    - GET /api/deforestation/compare/Amazonas?year_start=2020&year_end=2024
+    - GET /api/deforestation/compare/Cerrado?year_start=2020&year_end=2024
+    - GET /api/deforestation/compare/Brasil?year_start=2020&year_end=2024
+    """
     try:
         if year_end <= year_start:
             raise ValueError("year_end deve ser maior que year_start")
         
         logger.info(
-            f"GET /deforestation/compare/{state}"
+            f"GET /deforestation/compare/{state_or_biome}"
             f"?year_start={year_start}&year_end={year_end}"
         )
         result = await service.compare_deforestation(
-            state=state,
+            state_or_biome=state_or_biome,
             year_start=year_start,
             year_end=year_end
         )
@@ -192,23 +206,30 @@ async def compare_deforestation_get(
     "/deforestation/ranking",
     response_model=RankingResponse,
     summary="Ranking de estados por desmatamento",
-    description="Lista estados ordenados por área desmatada",
+    description="Lista estados ordenados por área desmatada (com filtro de bioma opcional)",
     tags=["Ações Principais"]
 )
 async def get_states_ranking_post(
     request: RankingRequest,
     service: DeforestationService = Depends(get_deforestation_service)
 ):
-    """Ação 3: Ranking de Estados"""
+    """
+    Ação 3: Ranking de Estados
+    
+    Agora com filtro opcional de bioma:
+    - biome: null (todos os estados)
+    - biome: "Amazônia" (apenas estados da Amazônia)
+    """
     try:
         logger.info(
             f"POST /deforestation/ranking: year={request.year}, "
-            f"order={request.order}, limit={request.limit}"
+            f"order={request.order}, limit={request.limit}, biome={request.biome}"
         )
         result = await service.get_states_ranking(
             year=request.year,
             order=request.order,
-            limit=request.limit
+            limit=request.limit,
+            biome=request.biome
         )
         return result
     except ValueError as e:
@@ -229,25 +250,34 @@ async def get_states_ranking_post(
     "/deforestation/ranking/{year}",
     response_model=RankingResponse,
     summary="Ranking de estados por desmatamento (GET)",
-    description="Versão GET do endpoint de ranking",
+    description="Versão GET com filtro opcional de bioma",
     tags=["Ações Principais"]
 )
 async def get_states_ranking_get(
     year: int,
     order: str = Query("desc", regex="^(desc|asc)$"),
-    limit: int = Query(10, ge=1, le=20),
+    limit: int = Query(10, ge=1, le=30),
+    biome: Optional[str] = Query(None, description="Filtrar por bioma"),
     service: DeforestationService = Depends(get_deforestation_service)
 ):
-    """Ação 3: Ranking de Estados (GET)"""
+    """
+    Ação 3: Ranking de Estados (GET)
+    
+    **Exemplos:**
+    - GET /api/deforestation/ranking/2024 (todos os estados)
+    - GET /api/deforestation/ranking/2024?biome=Cerrado (apenas Cerrado)
+    - GET /api/deforestation/ranking/2024?order=asc&limit=5 (top 5 menores)
+    """
     try:
         logger.info(
             f"GET /deforestation/ranking/{year}"
-            f"?order={order}&limit={limit}"
+            f"?order={order}&limit={limit}&biome={biome}"
         )
         result = await service.get_states_ranking(
             year=year,
             order=order,
-            limit=limit
+            limit=limit,
+            biome=biome
         )
         return result
     except ValueError as e:
@@ -270,18 +300,27 @@ async def get_states_ranking_get(
 
 @router.get(
     "/deforestation/states",
-    response_model=StatesListResponse,
     summary="Listar estados disponíveis",
-    description="Retorna lista de estados da Amazônia Legal",
+    description="Retorna lista de estados (com filtro opcional de bioma)",
     tags=["Auxiliares"]
 )
 async def get_available_states(
+    biome: Optional[str] = Query(None, description="Filtrar por bioma (ex: Amazônia, Cerrado)"),
     service: DeforestationService = Depends(get_deforestation_service)
 ):
-    """Lista de Estados Disponíveis"""
+    """
+    **Lista de Estados Disponíveis**
+    
+    Retorna todos os estados brasileiros, opcionalmente filtrados por bioma.
+    
+    **Exemplos:**
+    - GET /api/deforestation/states (todos os 27 estados)
+    - GET /api/deforestation/states?biome=Amazônia (apenas estados da Amazônia)
+    - GET /api/deforestation/states?biome=Cerrado (apenas estados do Cerrado)
+    """
     try:
-        logger.info("GET /deforestation/states")
-        result = await service.get_available_states()
+        logger.info(f"GET /deforestation/states?biome={biome}")
+        result = await service.get_available_states(biome)
         return result
     except Exception as e:
         logger.error(f"Error in get_available_states: {e}")
@@ -301,7 +340,7 @@ async def get_available_states(
 async def get_available_years(
     service: DeforestationService = Depends(get_deforestation_service)
 ):
-    """Lista de Anos Disponíveis"""
+    """**Lista de Anos Disponíveis**"""
     try:
         logger.info("GET /deforestation/years")
         result = await service.get_available_years()
@@ -311,6 +350,86 @@ async def get_available_years(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro ao buscar lista de anos"
+        )
+
+
+@router.get(
+    "/deforestation/biomes",
+    summary="Listar biomas disponíveis",
+    description="Retorna lista de todos os biomas brasileiros",
+    tags=["Auxiliares"]
+)
+async def get_available_biomes(
+    service: DeforestationService = Depends(get_deforestation_service)
+):
+    """
+    **Lista de Biomas Disponíveis**
+    
+    Retorna os 6 biomas brasileiros:
+    - Amazônia
+    - Cerrado
+    - Mata Atlântica
+    - Caatinga
+    - Pampa
+    - Pantanal
+    """
+    try:
+        logger.info("GET /deforestation/biomes")
+        result = await service.get_available_biomes()
+        return result
+    except Exception as e:
+        logger.error(f"Error in get_available_biomes: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro ao buscar lista de biomas"
+        )
+
+
+# ==========================================
+# NOVO: Comparação de Biomas
+# ==========================================
+
+@router.get(
+    "/deforestation/biomes/compare/{year}",
+    summary="Comparar todos os biomas",
+    description="Compara degradação entre todos os biomas brasileiros em um ano",
+    tags=["Ações Principais"]
+)
+async def compare_biomes(
+    year: int,
+    service: DeforestationService = Depends(get_deforestation_service)
+):
+    """
+    **Comparação de Biomas**
+    
+    Retorna dados comparativos de todos os 6 biomas brasileiros em um ano específico.
+    Útil para visualizar qual bioma teve maior degradação.
+    
+    **Exemplo:**
+```
+    GET /api/deforestation/biomes/compare/2024
+```
+    
+    **Retorna:**
+    - Área degradada de cada bioma (km²)
+    - Percentual do total nacional
+    - Número de estados em cada bioma
+    """
+    try:
+        logger.info(f"GET /deforestation/biomes/compare/{year}")
+        result = await service.get_biome_comparison(year)
+        return result
+    except ValueError as e:
+        logger.warning(f"Validation error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        logger.error(f"Error in compare_biomes: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro ao comparar biomas"
         )
 
 
@@ -325,10 +444,15 @@ async def get_available_years(
     tags=["Auxiliares"]
 )
 async def deforestation_info():
-    """Informações sobre os Endpoints"""
+    """**Informações sobre os Endpoints**"""
     return {
-        "message": "🌳 Observa Floresta - API de Desmatamento",
-        "version": "1.0.0",
+        "message": "🌳 Observa Floresta - API de Desmatamento (TODOS OS BIOMAS)",
+        "version": "2.0.0",
+        "coverage": {
+            "states": 27,
+            "biomes": 6,
+            "years": "2020-2024"
+        },
         "actions": [
             {
                 "name": "Ação 1: Consultar por Estado",
@@ -336,36 +460,60 @@ async def deforestation_info():
                     "POST /api/deforestation/state",
                     "GET /api/deforestation/state/{state}"
                 ],
-                "description": "Dados de desmatamento de um estado específico"
+                "description": "Dados de desmatamento de um estado específico",
+                "examples": ["PA", "SP", "RS"]
             },
             {
                 "name": "Ação 2: Comparação Temporal",
                 "endpoints": [
                     "POST /api/deforestation/compare",
-                    "GET /api/deforestation/compare/{state}"
+                    "GET /api/deforestation/compare/{state_or_biome}"
                 ],
-                "description": "Compara desmatamento entre períodos"
+                "description": "Compara desmatamento entre períodos (estado, bioma ou Brasil)",
+                "examples": ["Pará", "Cerrado", "Brasil"]
             },
             {
                 "name": "Ação 3: Ranking de Estados",
                 "endpoints": [
                     "POST /api/deforestation/ranking",
-                    "GET /api/deforestation/ranking/{year}"
+                    "GET /api/deforestation/ranking/{year}?biome={biome}"
                 ],
-                "description": "Lista estados ordenados por desmatamento"
+                "description": "Lista estados ordenados por desmatamento (com filtro de bioma)",
+                "examples": ["?biome=Amazônia", "?biome=Cerrado"]
+            },
+            {
+                "name": "NOVO: Comparação de Biomas",
+                "endpoints": [
+                    "GET /api/deforestation/biomes/compare/{year}"
+                ],
+                "description": "Compara todos os 6 biomas brasileiros",
+                "examples": ["2024", "2023"]
             }
         ],
         "auxiliary": [
             {
                 "name": "Estados Disponíveis",
-                "endpoint": "GET /api/deforestation/states",
-                "description": "Lista estados da Amazônia Legal"
+                "endpoint": "GET /api/deforestation/states?biome={biome}",
+                "description": "Lista estados (com filtro opcional de bioma)"
+            },
+            {
+                "name": "Biomas Disponíveis",
+                "endpoint": "GET /api/deforestation/biomes",
+                "description": "Lista os 6 biomas brasileiros"
             },
             {
                 "name": "Anos Disponíveis",
                 "endpoint": "GET /api/deforestation/years",
                 "description": "Lista anos com dados disponíveis"
             }
+        ],
+        "biomes": [
+            "Amazônia",
+            "Cerrado",
+            "Mata Atlântica",
+            "Caatinga",
+            "Pampa",
+            "Pantanal"
         ],
         "docs": "/docs"
     }
