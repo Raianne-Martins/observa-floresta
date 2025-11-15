@@ -1,0 +1,30 @@
+# Web Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# Azure AI
+azure-ai-projects==1.0.0b1
+azure-identity==1.15.0
+
+# HTTP Client
+httpx==0.25.2
+aiohttp==3.9.1
+
+# Data Processing
+pandas==2.1.4
+numpy==1.26.2
+
+# Configuration
+python-dotenv==1.0.0
+pydantic==2.5.2
+pydantic-settings==2.1.0
+
+# CORS
+python-jose[cryptography]==3.3.0
+
+# Development
+pytest==7.4.3
+pytest-asyncio==0.21.1
+black==23.12.1
+mypy==1.7.1
