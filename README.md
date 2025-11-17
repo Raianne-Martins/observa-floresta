@@ -1,6 +1,6 @@
 # 🌳 Observa Floresta
 
-Sistema de monitoramento de desmatamento na Amazônia Legal utilizando Azure AI Foundry e análise de dados ambientais.
+Sistema de monitoramento de desmatamento nos biomas brasileiros utilizando Azure AI Foundry e análise de dados ambientais.
 
 ## 🎯 Sobre o Projeto
 
@@ -41,12 +41,9 @@ O projeto utiliza uma arquitetura híbrida:
 ```bash
 cd backend
 python -m venv venv
-venv\Scripts\activate.bat  #no powershell
+venv\Scripts\activate.bat
 pip install -r requirements.txt
 cp .env.example .env
-# Editar .env conforme necessário
-uvicorn app.main:app --reload
-#ou
 python -m uvicorn app.main:app --reload --port 8000
 ```
 
@@ -54,8 +51,6 @@ python -m uvicorn app.main:app --reload --port 8000
 ```bash
 cd frontend
 npm install
-cp .env.local.example .env.local
-# Editar .env.local conforme necessário
 npm run dev
 ```
 
@@ -75,11 +70,41 @@ python test_endpoints.py
 
 ## 🎓 Decisões Técnicas
 
-(Em desenvolvimento - será detalhado conforme implementação)
+### 📊 Sobre os Dados
+
+#### Fontes de Dados
+
+Os dados utilizados neste projeto são **baseados em fontes oficiais**:
+- **INPE** (Instituto Nacional de Pesquisas Espaciais) - TerraBrasilis
+- **IBGE** (Instituto Brasileiro de Geografia e Estatística)
+- **MapBiomas** - Plataforma de dados ambientais
+
+#### Implementação Atual
+
+Para fins de **demonstração e desenvolvimento**, o sistema utiliza dados mockados que:
+
+✅ **Refletem tendências reais** observadas nos últimos anos  
+✅ **Mantêm proporções realistas** entre estados e biomas  
+✅ **Seguem padrões históricos** de 2020-2024  
+✅ **São consistentes** com relatórios oficiais publicados
 
 ## 📸 Screenshots
 
-(Serão adicionados durante o desenvolvimento)
+
+![Figura 1. Azure AI Foundry - Projeto criado](..\Screenshots\criar_projeto.png)
+<br>
+![Figura 2. Agente deployado](..\Screenshots\agente_criado.png)
+<br>
+![Figura 3. Página de credenciais](..\Screenshots\credenciais_criadas.png)
+<br>
+![Figura 4. Playground](..\Screenshots\playground_agents.png)
+<br>
+![Figura 5. Terminal com Azure Agent Mode](..\Screenshots\azure_agent_terminal.png)
+<br>
+![Video 1. Swagger com resposta do agent](..\Screenshots\aswagger.mp4)
+<br>
+![Figura 6. Chat com agent](..\Screenshots\aswagger.mp4)
+<br>
 
 ## 📝 Licença
 

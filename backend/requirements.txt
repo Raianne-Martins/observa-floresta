@@ -28,3 +28,6 @@ pytest==7.4.3
 pytest-asyncio==0.21.1
 black==23.12.1
 mypy==1.7.1
+
+# Azure OpenAI
+openai==1.12.0
