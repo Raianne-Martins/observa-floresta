@@ -91,19 +91,42 @@ Para fins de **demonstração e desenvolvimento**, o sistema utiliza dados mocka
 ## 📸 Screenshots
 
 
-![Figura 1. Azure AI Foundry - Projeto criado](..\Screenshots\criar_projeto.png)
+![Figura 1. Azure AI Foundry - Projeto criado](docs/Screenshots/criar_projeto.png)
 <br>
-![Figura 2. Agente deployado](..\Screenshots\agente_criado.png)
+Figura 1. Azure AI Foundry - Projeto criado
 <br>
-![Figura 3. Página de credenciais](..\Screenshots\credenciais_criadas.png)
+
+---
+![Figura 2. Agente deployado](docs/Screenshots/agente_criado.png)
+Figura 2. Agente deployado
 <br>
-![Figura 4. Playground](..\Screenshots\playground_agents.png)
+
+---
+![Figura 3. Página de credenciais](docs/Screenshots/credenciais_criadas.png)
+Figura 3. Página de credenciais
 <br>
-![Figura 5. Terminal com Azure Agent Mode](..\Screenshots\azure_agent_terminal.png)
+
+---
+![Figura 4. Playground](docs/Screenshots/playground_agents.png)
+Playground – fornecendo uma pergunta em inglês (o agente foi configurado para responder apenas em português)
 <br>
-![Video 1. Swagger com resposta do agent](..\Screenshots\aswagger.mp4)
+
+---
+![Figura 5. Terminal com Azure Agent Mode](docs/Screenshots/azure_agent_terminal.png)
+Figura 5. Terminal com Azure Agent Mode
 <br>
-![Figura 6. Chat com agent](..\Screenshots\aswagger.mp4)
+
+---
+![Figura 6. Swagger com resposta do agent](docs/Screenshots/swagger.gif)
+<br>
+Figura 6.Swagger com resposta do agent
+<br>
+
+---
+
+![Figura 6. Chat com agent](docs/Screenshots/chat.gif)
+<br>
+Figura 6. Chat com agent
 <br>
 
 ## 📝 Licença
