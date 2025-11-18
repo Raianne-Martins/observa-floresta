@@ -7,6 +7,7 @@ import api from '@/lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, BarChart3, Leaf, TrendingDown, TrendingUp } from 'lucide-react';
+import Image from "next/image";
 
 interface HealthCheck {
   status: string;
@@ -37,9 +38,7 @@ export default function Home() {
     fetchHealth();
   }, []);
 
-  // Funções para navegação dos cards
   const handleCardClick = (action: string) => {
-    // Salvar query no localStorage para o chat processar
     if (typeof window !== 'undefined') {
       localStorage.setItem('pendingQuery', action);
       router.push('/chat');
@@ -48,17 +47,21 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-linear-to-b from-green-50 to-green-100">
-      {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-16">
           <div className="flex justify-center mb-6">
-            <span className="text-8xl">🌳</span>
+            <Image
+              src="/assets/logo.png"  
+              alt="Logo"
+              width={120}
+              height={120}
+            />
           </div>
           <h1 className="text-6xl font-bold text-green-800 mb-4">
             Observa Floresta
           </h1>
           <p className="text-2xl text-green-600 mb-8">
-            Monitoramento de Desmatamento na Amazônia Legal
+            Monitoramento de Desmatamento nos Biomas Brasileiros
           </p>
           <div className="flex gap-4 justify-center">
             <Link href="/chat">
@@ -82,7 +85,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Features - AGORA CLICÁVEIS */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           <Card
             className="hover:shadow-lg transition-all cursor-pointer hover:scale-105"
@@ -145,7 +147,6 @@ export default function Home() {
           </Card>
         </div>
 
-        {/* System Status */}
         <Card className="max-w-2xl mx-auto">
           <CardHeader>
             <CardTitle>Status do Sistema</CardTitle>
@@ -191,7 +192,6 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        {/* About */}
         <div className="mt-16 text-center max-w-3xl mx-auto">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">
             Sobre o Projeto
@@ -207,10 +207,9 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-16">
         <div className="container mx-auto px-4 py-8 text-center text-gray-600">
-          <p>🌳 Observa Floresta - Azure Frontier Girls Challenge 2024</p>
+          <p>🌳 Observa Floresta - Azure Frontier Girls Challenge 2025</p>
           <p className="text-sm mt-2">
             Dados: INPE • IBGE • MapBiomas | Tecnologias: Next.js • FastAPI • Azure AI Foundry
           </p>

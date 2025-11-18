@@ -35,7 +35,6 @@ export default function ChatPage() {
       if (pendingQuery) {
         processedPendingQuery.current = true;
         localStorage.removeItem('pendingQuery');
-        // Pequeno delay para a UI carregar
         setTimeout(() => {
           processQuery(pendingQuery);
         }, 500);
@@ -61,21 +60,20 @@ export default function ChatPage() {
     try {
       const lowerQuery = query.toLowerCase();
 
-      // Ação 1: Consulta por estado
       if (lowerQuery.includes('desmatamento') && (lowerQuery.includes('em') || lowerQuery.includes('no'))) {
         const stateMatch = query.match(/(?:em|no|na)\s+(\w+)/i);
         const yearMatch = query.match(/(\d{4})/);
 
         if (stateMatch) {
-          const state = stateMatch[1];
+          const state = stateMatch[1].trim();
           const year = yearMatch ? parseInt(yearMatch[1]) : undefined;
 
           const data = await deforestationApi.getStateData(state, year);
 
-          const response = `📊 **Desmatamento em ${data.state} (${data.year})**
+          const response = `📊 Desmatamento em ${data.state} (${data.year})
 
-🌳 Área desmatada: **${data.area_km2.toLocaleString('pt-BR')} km²**
-📈 Percentual do total: **${data.percentage_of_total.toFixed(1)}%**
+🌳 Área desmatada: ${data.area_km2.toLocaleString('pt-BR')} km²
+📈 Percentual do total: ${data.percentage_of_total.toFixed(1)}%
 🏞️ Bioma: ${data.biome}
 
 **Comparação com ${data.comparison_previous_year.year}:**
@@ -89,18 +87,17 @@ ${data.comparison_previous_year.change_km2 < 0 ? '📉' : '📈'} ${data.compari
       else if (lowerQuery.includes('bioma') ||
         lowerQuery.match(/amazônia|cerrado|mata atlântica|caatinga|pampa|pantanal/i)) {
 
-        // Comparação de biomas
         if (lowerQuery.includes('compar') || lowerQuery.includes('todos')) {
           const yearMatch = query.match(/(\d{4})/);
           const year = yearMatch ? parseInt(yearMatch[1]) : 2024;
 
           const data = await deforestationApi.compareBiomes(year);
 
-          const response = `🌍 **Comparação de Biomas (${data.year})**
+          const response = `🌍 Comparação de Biomas (${data.year})
 
-📊 Total Brasil: **${data.total_brazil_km2.toLocaleString('pt-BR')} km²**
+📊 Total Brasil: ${data.total_brazil_km2.toLocaleString('pt-BR')} km²
 
-**Ranking por bioma:**
+Ranking por bioma:
 
 ${data.biomes.map((b, idx) =>
             `${idx + 1}º ${b.biome}
@@ -110,7 +107,6 @@ ${data.biomes.map((b, idx) =>
 
           addMessage(response, false);
         }
-        // Ranking de um bioma específico
         else if (lowerQuery.includes('ranking') || lowerQuery.includes('estados')) {
           const biomeMatch = query.match(/(amazônia|cerrado|mata atlântica|caatinga|pampa|pantanal)/i);
           const yearMatch = query.match(/(\d{4})/);
@@ -133,11 +129,11 @@ ${data.ranking.map(item =>
         }
       }
 
-      // Ação 2: Comparação temporal
       else if (lowerQuery.includes('compare') || lowerQuery.includes('compar') || lowerQuery.includes('entre')) {
         const stateMatch =
-          query.match(/(?:compare|compar)[a-z]*\s+(\w+)/i) ||
-          query.match(/(\w+)\s+entre/i);
+          query.match(/(?:compare|compar)[a-z]*\s+([a-zà-ú\s]+)/i) ||
+          query.match(/([a-zà-ú\s]+?)\s+entre/i);
+
         const yearsMatch = query.match(/(\d{4})\s+(?:e|a|até)\s+(\d{4})/);
 
         if (stateMatch && yearsMatch) {
@@ -161,14 +157,14 @@ ${data.ranking.map(item =>
                 ? 'AUMENTO'
                 : 'ESTÁVEL';
 
-          const response = `📊 **Comparação: ${data.state} (${data.year_start}-${data.year_end})**
+          const response = `📊 Comparação: ${data.state} (${data.year_start}-${data.year_end})
 
-${trendEmoji} **Tendência: ${trendText}**
+${trendEmoji} Tendência: ${trendText}
 
 📉 Mudança total: ${data.total_change_km2 > 0 ? '+' : ''}${data.total_change_km2.toFixed(1)} km²
 📊 Variação percentual: ${data.percentage_change > 0 ? '+' : ''}${data.percentage_change.toFixed(1)}%
 
-**Dados por ano:**
+Dados por ano:
 ${data.data.map((d) => `${d.year}: ${d.area_km2.toFixed(1)} km²`).join('\n')}
 
 🏞️ Bioma: ${data.biome}`;
@@ -177,7 +173,6 @@ ${data.data.map((d) => `${d.year}: ${d.area_km2.toFixed(1)} km²`).join('\n')}
         }
       }
 
-      // Ação 3: Ranking
       else if (lowerQuery.includes('ranking') || lowerQuery.includes('top') || lowerQuery.includes('quais')) {
         const yearMatch = query.match(/(\d{4})/);
         const limitMatch = query.match(/(\d+)\s+estados?/i);
@@ -189,11 +184,11 @@ ${data.data.map((d) => `${d.year}: ${d.area_km2.toFixed(1)} km²`).join('\n')}
 
         const data = await deforestationApi.getRanking(year, order, limit);
 
-        const response = `🏆 **Ranking de Desmatamento (${data.year})**
+        const response = `🏆 Ranking de Desmatamento (${data.year})
 
-📊 Total Brasil: **${data.total_brazil_km2.toLocaleString('pt-BR')} km²**
+📊 Total Brasil: ${data.total_brazil_km2.toLocaleString('pt-BR')} km²
 
-${order === 'desc' ? '**Estados que MAIS desmataram:**' : '**Estados que MENOS desmataram:**'}
+${order === 'desc' ? 'Estados que MAIS desmataram:' : 'Estados que MENOS desmataram:'}
 
 ${data.ranking
             .map(
@@ -206,7 +201,6 @@ ${data.ranking
         addMessage(response, false);
       }
 
-      // Caso não reconheça o comando
       else {
         addMessage(
           '❓ Desculpe, não entendi sua pergunta. Tente perguntar sobre:\n\n' +
@@ -229,7 +223,6 @@ ${data.ranking
 
   return (
     <div className="min-h-screen bg-linear-to-b from-green-50 to-green-100">
-      {/* Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -260,7 +253,6 @@ ${data.ranking
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Welcome Message */}
         {messages.length === 0 && (
           <div className="mb-8">
             <Card className="p-8 text-center">
@@ -277,7 +269,6 @@ ${data.ranking
           </div>
         )}
 
-        {/* Chat Messages */}
         <Card className="h-[600px] flex flex-col">
           <div className="flex-1 overflow-y-auto p-6">
             {messages.map((message) => (
@@ -304,7 +295,6 @@ ${data.ranking
           <ChatInput onSend={processQuery} disabled={isLoading} />
         </Card>
 
-        {/* Info Footer */}
         <div className="mt-6 text-center text-sm text-gray-600">
           <p>
             💡 Dica: Use linguagem natural! Exemplos: &quot;Qual o desmatamento em RO?&quot;

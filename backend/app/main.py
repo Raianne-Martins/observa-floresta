@@ -10,23 +10,20 @@ import logging
 from app.config import settings
 from app.routers import deforestation, health
 
-# Configurar logging
 logging.basicConfig(
     level=getattr(logging, settings.LOG_LEVEL),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
-# Criar aplicação FastAPI
 app = FastAPI(
     title="Observa Floresta API",
-    description="API para monitoramento de desmatamento na Amazônia Legal",
+    description="API para monitoramento de desmatamento",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc"
 )
 
-# Configurar CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
@@ -35,7 +32,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Incluir routers - SEM PREFIX no deforestation (ele já tem /deforestation nas rotas)
 app.include_router(health.router, prefix="/api", tags=["Health"])
 app.include_router(deforestation.router, prefix="/api", tags=["Desmatamento"])
 
