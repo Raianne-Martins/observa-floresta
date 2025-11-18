@@ -97,7 +97,7 @@ Figura 1. Azure AI Foundry - Projeto criado
 <br>
 
 ---
-![Figura 2. Agente deployado](docs/Screenshots/agente_criado.png)
+![Figura 2. Agente deployado](docs/Screenshots/agente_criado1.png)
 <br><br>
 Figura 2. Agente deployado
 <br>
