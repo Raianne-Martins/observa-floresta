@@ -6,7 +6,7 @@ Sistema de monitoramento de desmatamento nos biomas brasileiros utilizando Azure
 
 Este projeto foi desenvolvido como parte do **Azure Frontier Girls 2025**.
 
-O Observa Floresta é um agente inteligente que permite consultar, comparar e analisar dados de desmatamento dos estados da Amazônia Legal, utilizando dados públicos do INPE, IBGE e MapBiomas.
+O Observa Floresta é um agente inteligente que permite consultar, comparar e analisar dados de desmatamento dos biomas brasileiros, utilizando dados públicos do INPE, IBGE e MapBiomas.
 
 ## 🏗️ Arquitetura
 
@@ -21,13 +21,13 @@ O projeto utiliza uma arquitetura híbrida:
 - Python 3.12.x
 - FastAPI
 - Azure AI Foundry SDK
-- Pandas (análise de dados)
+- Pandas 
 
 **Frontend:**
-- Next.js 14 (App Router)
+- Next.js 14 
 - TypeScript
 - Tailwind CSS
-- Recharts (visualizações)
+- Recharts 
 
 ## 🚀 Como Executar
 
@@ -62,7 +62,7 @@ python test_endpoints.py
 
 ## 📊 Funcionalidades
 
-### 3 Ações Principais
+### 3 Ações Principais:
 
 1. **Consulta por Estado**: Dados de desmatamento de um estado específico
 2. **Comparação Temporal**: Análise de tendências ao longo dos anos
@@ -83,51 +83,63 @@ Os dados utilizados neste projeto são **baseados em fontes oficiais**:
 
 Para fins de **demonstração e desenvolvimento**, o sistema utiliza dados mockados que:
 
-✅ **Refletem tendências reais** observadas nos últimos anos  
-✅ **Mantêm proporções realistas** entre estados e biomas  
-✅ **Seguem padrões históricos** de 2020-2024  
-✅ **São consistentes** com relatórios oficiais publicados
+**Refletem tendências reais** observadas nos últimos anos  
+**Mantêm proporções realistas** entre estados e biomas  
+**Seguem padrões históricos** de 2020-2024  
+**São consistentes** com relatórios oficiais publicados
 
 ## 📸 Screenshots
 
 
 ![Figura 1. Azure AI Foundry - Projeto criado](docs/Screenshots/criar_projeto.png)
-<br>
+<br><br>
 Figura 1. Azure AI Foundry - Projeto criado
 <br>
 
 ---
-![Figura 2. Agente deployado](docs/Screenshots/agente_criado.png)
+![Figura 2. Agente deployado](docs/Screenshots/agente_criado1.png)
+<br><br>
 Figura 2. Agente deployado
 <br>
 
 ---
 ![Figura 3. Página de credenciais](docs/Screenshots/credenciais_criadas.png)
+<br><br>
 Figura 3. Página de credenciais
 <br>
 
 ---
 ![Figura 4. Playground](docs/Screenshots/playground_agents.png)
-Playground – fornecendo uma pergunta em inglês (o agente foi configurado para responder apenas em português)
+<br><br>
+Figur 4. Playground – fornecendo uma pergunta em inglês (o agente foi configurado para responder apenas em português)
 <br>
 
 ---
 ![Figura 5. Terminal com Azure Agent Mode](docs/Screenshots/azure_agent_terminal.png)
+<br><br>
 Figura 5. Terminal com Azure Agent Mode
 <br>
 
 ---
 ![Figura 6. Swagger com resposta do agent](docs/Screenshots/swagger.gif)
-<br>
-Figura 6.Swagger com resposta do agent
+<br><br>
+Figura 6. Swagger com resposta do agent
 <br>
 
 ---
 
 ![Figura 6. Chat com agent](docs/Screenshots/chat.gif)
-<br>
+<br><br>
 Figura 6. Chat com agent
 <br>
+
+---
+![Vídeo sem título (2)](https://github.com/user-attachments/assets/45420240-c296-40a7-be1b-c67d5c8c8528)
+<br><br>
+Figura 7. Aplicação Web
+<br>
+
+---
 
 ## 📝 Licença
 
