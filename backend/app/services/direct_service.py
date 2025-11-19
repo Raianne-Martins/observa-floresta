@@ -1,55 +1,74 @@
 """
-Direct Service - Lógica de desmatamento SEM usar Azure Agent
+Direct Service - VERSÃO CORRIGIDA
+Aceita tanto texto natural quanto inputs simples (estado + ano)
 """
 from typing import Dict, Optional
 import logging
 from datetime import datetime
+from fastapi import HTTPException, status
 
-from app.config import settings
+from app.services.smart_service import SmartDataServiceOptimized as SmartDataService
+from app.services import mock_data_brazil
 
 logger = logging.getLogger(__name__)
 
 
 class DirectService:
     """
-    Serviço que implementa as ações diretamente
-    SEM dependência do Azure Agent
+    Serviço que usa SmartDataService
+    (com fallback automático para mock)
     """
     
     def __init__(self):
-        self.use_mock = settings.MOCK_DATA
-        logger.info(f"DirectService inicializado (mock_data={self.use_mock})")
+        logger.info("="*60)
+        logger.info("🔧 DirectService inicializando...")
+        logger.info("="*60)
         
-        # Escolher qual mock data usar
+        self.smart_service = SmartDataService()
+        self.use_mock = not self.smart_service.use_real_api
+        
         if self.use_mock:
-            from app.services import mock_data_brazil as mock_data
-            self.mock_data = mock_data
+            logger.warning("⚠️  MODO MOCK ATIVADO - Dados reais não serão buscados")
+        else:
+            logger.info("✅ MODO API REAL - Buscando dados do INPE")
     
     async def get_state_deforestation(
         self,
         state: str,
         year: Optional[int] = None
     ) -> Dict:
-        """Ação 1: Consultar desmatamento por estado"""
-        logger.info(f"DirectService.get_state_deforestation: state={state}, year={year}")
+        """
+        Ação 1: Consultar desmatamento por estado
         
+        Aceita:
+        - Input simples: state="PA", year=2024
+        - Input simples: state="Pará", year=2024
+        - Texto natural: state="desmatamento no Pará em 2024"
+        """
+        # Se ano não fornecido, usar ano atual
         if year is None:
             year = datetime.now().year
         
-        try:
-            if self.use_mock:
-                data = self.mock_data.get_state_data(state, year)
-                logger.info(f"Dados retornados (mock): {state} - {year}")
-                return data
-            else:
-                raise NotImplementedError("Integração com API real ainda não implementada")
+        logger.info(f"🌳 DirectService.get_state_deforestation: {state}, {year}")
         
-        except ValueError as e:
-            logger.error(f"Erro de validação: {e}")
-            raise
+        try:
+            result = await self.smart_service.get_state_data(state, year)
+            
+            if result and 'data_source' in result:
+                source = result['data_source']
+                if source == 'real_api':
+                    logger.info(f"   ✅ Dados REAIS obtidos da API para {state}/{year}")
+                elif source == 'mock':
+                    logger.warning(f"   📦 Fallback para MOCK (API falhou ou indisponível)")
+            
+            return result
+            
         except Exception as e:
-            logger.error(f"Erro ao buscar dados: {e}")
-            raise
+            logger.error(f"❌ Erro ao buscar dados: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro ao buscar dados de desmatamento: {str(e)}"
+            )
     
     async def compare_deforestation(
         self,
@@ -57,26 +76,43 @@ class DirectService:
         year_start: int,
         year_end: int
     ) -> Dict:
-        """Ação 2: Comparar desmatamento entre períodos (estado ou bioma)"""
-        logger.info(
-            f"DirectService.compare_deforestation: "
-            f"entity={state_or_biome}, years={year_start}-{year_end}"
-        )
+        """
+        Ação 2: Comparar desmatamento entre períodos
+        
+        Aceita:
+        - state_or_biome="PA", year_start=2020, year_end=2024
+        - state_or_biome="Pará", year_start=2020, year_end=2024
+        - state_or_biome="Amazônia", year_start=2020, year_end=2024
+        """
+        logger.info(f"📊 DirectService.compare_deforestation: {state_or_biome}, {year_start}-{year_end}")
+        
+        # Validação básica
+        if year_end <= year_start:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="year_end deve ser maior que year_start"
+            )
         
         try:
-            if self.use_mock:
-                data = self.mock_data.get_comparison_data(state_or_biome, year_start, year_end)
-                logger.info(f"Comparação retornada (mock): {state_or_biome} {year_start}-{year_end}")
-                return data
-            else:
-                raise NotImplementedError("Integração com API real ainda não implementada")
-        
-        except ValueError as e:
-            logger.error(f"Erro de validação: {e}")
-            raise
+            result = await self.smart_service.compare_data(
+                state_or_biome, year_start, year_end
+            )
+            
+            if result and 'data_source' in result:
+                source = result['data_source']
+                if source == 'real_api':
+                    logger.info(f"   ✅ Comparação REAL obtida da API para {state_or_biome}")
+                elif source == 'mock':
+                    logger.warning(f"   📦 Fallback para MOCK (API falhou ou indisponível)")
+            
+            return result
+            
         except Exception as e:
-            logger.error(f"Erro ao comparar dados: {e}")
-            raise
+            logger.error(f"❌ Erro ao comparar dados: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro ao comparar dados: {str(e)}"
+            )
     
     async def get_states_ranking(
         self,
@@ -85,79 +121,63 @@ class DirectService:
         limit: int = 10,
         biome: Optional[str] = None
     ) -> Dict:
-        """Ação 3: Ranking de estados por desmatamento (com filtro de bioma)"""
-        logger.info(
-            f"DirectService.get_states_ranking: "
-            f"year={year}, order={order}, limit={limit}, biome={biome}"
-        )
+        """Ação 3: Ranking de estados"""
+        logger.info(f"🏆 DirectService.get_states_ranking: {year}, {order}, {limit}, {biome}")
         
         try:
-            if self.use_mock:
-                data = self.mock_data.get_ranking_data(year, order, limit, biome)
-                logger.info(f"Ranking retornado (mock): {year} top {limit}")
-                return data
-            else:
-                raise NotImplementedError("Integração com API real ainda não implementada")
-        
-        except ValueError as e:
-            logger.error(f"Erro de validação: {e}")
-            raise
+            result = await self.smart_service.get_ranking(year, order, limit, biome)
+            
+            if result and 'data_source' in result:
+                source = result['data_source']
+                if source == 'real_api':
+                    logger.info(f"   ✅ Ranking REAL obtido da API para {year}")
+                elif source == 'mock':
+                    logger.warning(f"   📦 Fallback para MOCK (API falhou ou indisponível)")
+            
+            return result
+            
         except Exception as e:
-            logger.error(f"Erro ao buscar ranking: {e}")
-            raise
+            logger.error(f"❌ Erro ao buscar ranking: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro ao buscar ranking: {str(e)}"
+            )
     
     async def get_biome_comparison(self, year: int) -> Dict:
-        """NOVA: Comparar todos os biomas"""
-        logger.info(f"DirectService.get_biome_comparison: year={year}")
+        """Comparar todos os biomas"""
+        logger.info(f"🌿 DirectService.get_biome_comparison: {year}")
         
         try:
-            if self.use_mock:
-                data = self.mock_data.get_biome_comparison(year)
-                logger.info(f"Comparação de biomas retornada: {year}")
-                return data
-            else:
-                raise NotImplementedError("Integração com API real ainda não implementada")
-        
-        except ValueError as e:
-            logger.error(f"Erro de validação: {e}")
-            raise
+            result = await self.smart_service.get_biome_comparison(year)
+            return result
+            
         except Exception as e:
-            logger.error(f"Erro ao comparar biomas: {e}")
-            raise
+            logger.error(f"❌ Erro em get_biome_comparison: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro ao comparar biomas: {str(e)}"
+            )
     
     async def get_available_states(self, biome: Optional[str] = None) -> Dict:
-        """Retorna lista de estados disponíveis (com filtro de bioma)"""
-        logger.info(f"DirectService.get_available_states: biome={biome}")
-        
-        try:
-            states = self.mock_data.get_available_states(biome)
-            return states
-        except Exception as e:
-            logger.error(f"Erro ao buscar estados: {e}")
-            raise
+        """Lista estados disponíveis"""
+        return await self.smart_service.get_available_states(biome)
     
     async def get_available_years(self) -> Dict:
-        """Retorna lista de anos disponíveis"""
-        logger.info("DirectService.get_available_years")
-        
-        try:
-            years = self.mock_data.get_available_years()
-            return years
-        except Exception as e:
-            logger.error(f"Erro ao buscar anos: {e}")
-            raise
+        """Lista anos disponíveis"""
+        return await self.smart_service.get_available_years()
     
     async def get_available_biomes(self) -> Dict:
-        """NOVA: Retorna lista de biomas disponíveis"""
-        logger.info("DirectService.get_available_biomes")
-        
-        try:
-            biomes = self.mock_data.get_available_biomes()
-            return {
-                "biomes": biomes,
-                "total": len(biomes),
-                "timestamp": datetime.utcnow().isoformat()
-            }
-        except Exception as e:
-            logger.error(f"Erro ao buscar biomas: {e}")
-            raise
+        """Lista biomas disponíveis"""
+        result = await self.smart_service.get_available_biomes()
+        # Converter list para dict com timestamp
+        return {
+            "biomes": result,
+            "total": len(result),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    
+    async def close(self):
+        """Limpa recursos"""
+        logger.info("🔌 DirectService.close() - limpando recursos...")
+        await self.smart_service.close()
+        logger.info("✅ Recursos limpos")

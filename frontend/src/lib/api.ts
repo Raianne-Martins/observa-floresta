@@ -8,7 +8,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export const api = axios.create({
   baseURL: API_URL,
-  timeout: 30000,
+  timeout: 120000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -80,16 +80,13 @@ export interface BiomeComparisonData {
   timestamp: string;
 }
 
-// Funções de API
 export const deforestationApi = {
-  // Ação 1: Consultar por estado
   getStateData: async (state: string, year?: number): Promise<StateDeforestationData> => {
     const params = year ? { year } : {};
     const response = await api.get(`/api/deforestation/state/${state}`, { params });
     return response.data;
   },
 
-  // Ação 2: Comparação temporal (estado, bioma ou Brasil)
   compareData: async (
     stateOrBiome: string,
     yearStart: number,
@@ -101,7 +98,6 @@ export const deforestationApi = {
     return response.data;
   },
 
-  // Ação 3: Ranking (com filtro de bioma)
   getRanking: async (
     year: number,
     order: 'desc' | 'asc' = 'desc',
@@ -115,13 +111,11 @@ export const deforestationApi = {
     return response.data;
   },
 
-  // NOVO: Comparar biomas
   compareBiomes: async (year: number): Promise<BiomeComparisonData> => {
     const response = await api.get(`/api/deforestation/biomes/compare/${year}`);
     return response.data;
   },
 
-  // Auxiliares
   getStates: async (biome?: string) => {
     const params = biome ? { biome } : {};
     const response = await api.get('/api/deforestation/states', { params });

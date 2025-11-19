@@ -79,7 +79,14 @@ async def get_state_deforestation_get(
     year: Optional[int] = Query(None, ge=2020, le=2024),
     service: DeforestationService = Depends(get_deforestation_service)
 ):
-    """Ação 1: Consultar Desmatamento por Estado (GET)"""
+    """
+    Ação 1: Consultar Desmatamento por Estado (GET)
+    
+    Aceita:
+    - Siglas: PA, AM, RS, etc
+    - Nomes completos: Pará, Amazonas, etc
+    - Nomes sem acento: Para, Amazonas, etc
+    """
     try:
         logger.info(f"GET /deforestation/state/{state}?year={year}")
         result = await service.get_state_deforestation(
@@ -158,32 +165,46 @@ async def compare_deforestation_post(
 )
 async def compare_deforestation_get(
     state_or_biome: str,
-    year_start: int = Query(..., ge=2020, le=2024),
-    year_end: int = Query(..., ge=2020, le=2024),
+    year_start: int = Query(..., ge=2020, le=2024, description="Ano inicial"),
+    year_end: int = Query(..., ge=2020, le=2024, description="Ano final"),
     service: DeforestationService = Depends(get_deforestation_service)
 ):
     """
     Ação 2: Comparar Desmatamento Temporal (GET)
     
-    **Exemplos:**
+    ⚠️ IMPORTANTE: NÃO inclua texto extra no path parameter!
+    
+    ✅ CORRETO:
     - GET /api/deforestation/compare/Amazonas?year_start=2020&year_end=2024
+    - GET /api/deforestation/compare/PA?year_start=2020&year_end=2024
     - GET /api/deforestation/compare/Cerrado?year_start=2020&year_end=2024
     - GET /api/deforestation/compare/Brasil?year_start=2020&year_end=2024
+    
+    ❌ ERRADO:
+    - GET /api/deforestation/compare/Amazonas entre?year_start=2020
+    
+    Aceita:
+    - Estados: Siglas (PA, AM) ou nomes completos/sem acento
+    - Biomas: Amazônia, Cerrado, Mata Atlântica, Caatinga, Pampa, Pantanal
+    - Brasil: "Brasil" ou "Brazil"
     """
     try:
+        # Validação básica
         if year_end <= year_start:
             raise ValueError("year_end deve ser maior que year_start")
         
         logger.info(
-            f"GET /deforestation/compare/{state_or_biome}"
+            f"GET /deforestation/compare/{state_or_biome} "
             f"?year_start={year_start}&year_end={year_end}"
         )
+        
         result = await service.compare_deforestation(
             state_or_biome=state_or_biome,
             year_start=year_start,
             year_end=year_end
         )
         return result
+        
     except ValueError as e:
         logger.warning(f"Validation error: {e}")
         raise HTTPException(
@@ -191,7 +212,7 @@ async def compare_deforestation_get(
             detail=str(e)
         )
     except Exception as e:
-        logger.error(f"Error in compare_deforestation_get: {e}")
+        logger.error(f"Error in compare_deforestation_get: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro ao comparar dados de desmatamento"
@@ -255,8 +276,8 @@ async def get_states_ranking_post(
 )
 async def get_states_ranking_get(
     year: int,
-    order: str = Query("desc", regex="^(desc|asc)$"),
-    limit: int = Query(10, ge=1, le=30),
+    order: str = Query("desc", regex="^(desc|asc)$", description="Ordem: desc ou asc"),
+    limit: int = Query(10, ge=1, le=30, description="Limite de resultados"),
     biome: Optional[str] = Query(None, description="Filtrar por bioma"),
     service: DeforestationService = Depends(get_deforestation_service)
 ):
@@ -266,7 +287,8 @@ async def get_states_ranking_get(
     **Exemplos:**
     - GET /api/deforestation/ranking/2024 (todos os estados)
     - GET /api/deforestation/ranking/2024?biome=Cerrado (apenas Cerrado)
-    - GET /api/deforestation/ranking/2024?order=asc&limit=5 (top 5 menores)
+    - GET /api/deforestation/ranking/2024?biome=Amazônia&order=desc&limit=5 (top 5 da Amazônia)
+    - GET /api/deforestation/ranking/2024?order=asc&limit=5 (5 estados com MENOR desmatamento)
     """
     try:
         logger.info(
@@ -406,9 +428,9 @@ async def compare_biomes(
     Útil para visualizar qual bioma teve maior degradação.
     
     **Exemplo:**
-```
+    ```
     GET /api/deforestation/biomes/compare/2024
-```
+    ```
     
     **Retorna:**
     - Área degradada de cada bioma (km²)
@@ -447,7 +469,7 @@ async def deforestation_info():
     """**Informações sobre os Endpoints**"""
     return {
         "message": "🌳 Observa Floresta - API de Desmatamento (TODOS OS BIOMAS)",
-        "version": "2.0.0",
+        "version": "2.0.1",
         "coverage": {
             "states": 27,
             "biomes": 6,
@@ -461,7 +483,11 @@ async def deforestation_info():
                     "GET /api/deforestation/state/{state}"
                 ],
                 "description": "Dados de desmatamento de um estado específico",
-                "examples": ["PA", "SP", "RS"]
+                "examples": [
+                    "GET /api/deforestation/state/PA?year=2024",
+                    "GET /api/deforestation/state/Pará?year=2024",
+                    "GET /api/deforestation/state/Para?year=2024"
+                ]
             },
             {
                 "name": "Ação 2: Comparação Temporal",
@@ -470,16 +496,24 @@ async def deforestation_info():
                     "GET /api/deforestation/compare/{state_or_biome}"
                 ],
                 "description": "Compara desmatamento entre períodos (estado, bioma ou Brasil)",
-                "examples": ["Pará", "Cerrado", "Brasil"]
+                "examples": [
+                    "GET /api/deforestation/compare/Pará?year_start=2020&year_end=2024",
+                    "GET /api/deforestation/compare/Cerrado?year_start=2020&year_end=2024",
+                    "GET /api/deforestation/compare/Brasil?year_start=2020&year_end=2024"
+                ]
             },
             {
                 "name": "Ação 3: Ranking de Estados",
                 "endpoints": [
                     "POST /api/deforestation/ranking",
-                    "GET /api/deforestation/ranking/{year}?biome={biome}"
+                    "GET /api/deforestation/ranking/{year}"
                 ],
                 "description": "Lista estados ordenados por desmatamento (com filtro de bioma)",
-                "examples": ["?biome=Amazônia", "?biome=Cerrado"]
+                "examples": [
+                    "GET /api/deforestation/ranking/2024",
+                    "GET /api/deforestation/ranking/2024?biome=Amazônia&limit=5",
+                    "GET /api/deforestation/ranking/2024?order=asc&limit=5"
+                ]
             },
             {
                 "name": "NOVO: Comparação de Biomas",
@@ -487,7 +521,9 @@ async def deforestation_info():
                     "GET /api/deforestation/biomes/compare/{year}"
                 ],
                 "description": "Compara todos os 6 biomas brasileiros",
-                "examples": ["2024", "2023"]
+                "examples": [
+                    "GET /api/deforestation/biomes/compare/2024"
+                ]
             }
         ],
         "auxiliary": [
@@ -515,5 +551,11 @@ async def deforestation_info():
             "Pampa",
             "Pantanal"
         ],
+        "tips": {
+            "estados": "Use siglas (PA, AM) ou nomes completos/sem acento",
+            "urls": "NÃO inclua texto extra no path: use /compare/Amazonas (não /compare/Amazonas entre)",
+            "biomas": "Use nomes corretos: Amazônia, Cerrado, etc",
+            "brasil": "Para dados nacionais, use: /compare/Brasil"
+        },
         "docs": "/docs"
     }

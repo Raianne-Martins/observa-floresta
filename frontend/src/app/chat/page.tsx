@@ -76,7 +76,7 @@ export default function ChatPage() {
 📈 Percentual do total: ${data.percentage_of_total.toFixed(1)}%
 🏞️ Bioma: ${data.biome}
 
-**Comparação com ${data.comparison_previous_year.year}:**
+Comparação com ${data.comparison_previous_year.year}:
 ${data.comparison_previous_year.change_km2 < 0 ? '📉' : '📈'} ${data.comparison_previous_year.change_percentage > 0 ? '+' : ''}${data.comparison_previous_year.change_percentage.toFixed(1)}% (${data.comparison_previous_year.change_km2 > 0 ? '+' : ''}${data.comparison_previous_year.change_km2.toFixed(1)} km²)`;
 
           addMessage(response, false);

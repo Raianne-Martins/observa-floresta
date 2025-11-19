@@ -3,11 +3,14 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import api from '@/lib/api';
+import api from '@/lib/api'; // Certifique-se de que esta importação está correta
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, BarChart3, Leaf, TrendingDown, TrendingUp } from 'lucide-react';
-import Image from "next/image";
+import { MessageSquare, BarChart3, TrendingDown, TrendingUp, Leaf } from 'lucide-react';
+import Image from 'next/image';
+// As importações abaixo são para a página /chat. Removendo de / para evitar confusão.
+// import { parseQuery, validateQuery, formatStateName } from '@/lib/queryParser';
+// import { deforestationApi } from '@/lib/api'; 
 
 interface HealthCheck {
   status: string;
@@ -18,11 +21,15 @@ interface HealthCheck {
   version: string;
 }
 
+/**
+ * Componente da Página Inicial (/)
+ */
 export default function Home() {
   const [health, setHealth] = useState<HealthCheck | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // 1. Hook para buscar o status de saúde (Health Check) do backend
   useEffect(() => {
     async function fetchHealth() {
       try {
@@ -30,6 +37,8 @@ export default function Home() {
         setHealth(response.data);
       } catch (error) {
         console.error('Erro ao buscar health:', error);
+        // Opcional: setar health para um objeto de erro para mostrar o estado "vermelho"
+        setHealth(null); 
       } finally {
         setLoading(false);
       }
@@ -38,23 +47,30 @@ export default function Home() {
     fetchHealth();
   }, []);
 
+  // 2. Handler para redirecionar para o chat com uma query pendente
   const handleCardClick = (action: string) => {
     if (typeof window !== 'undefined') {
+      // Armazena a ação/query no LocalStorage para ser lida na página /chat
       localStorage.setItem('pendingQuery', action);
       router.push('/chat');
     }
   };
 
+  // ❌ A função processQuery foi removida daqui, pois pertence ao componente de chat.
+
   return (
     <main className="min-h-screen bg-linear-to-b from-green-50 to-green-100">
       <div className="container mx-auto px-4 py-16">
+        {/* === Cabeçalho e Botões Principais === */}
         <div className="text-center mb-16">
           <div className="flex justify-center mb-6">
+            {/* Adicionando um fallback se o Image não for carregado */}
             <Image
-              src="/assets/logo.png"  
-              alt="Logo"
+              src="/assets/logo.png"
+              alt="Logo Observa Floresta"
               width={120}
               height={120}
+              priority
             />
           </div>
           <h1 className="text-6xl font-bold text-green-800 mb-4">
@@ -64,19 +80,19 @@ export default function Home() {
             Monitoramento de Desmatamento nos Biomas Brasileiros
           </p>
           <div className="flex gap-4 justify-center">
-            <Link href="/chat">
+            <Link href="/chat" passHref>
               <Button size="lg" className="text-lg">
                 <MessageSquare className="mr-2 h-5 w-5" />
                 Iniciar Chat
               </Button>
             </Link>
-            <Link href="/dashboard">
+            <Link href="/dashboard" passHref>
               <Button size="lg" variant="outline" className="text-lg">
                 <BarChart3 className="mr-2 h-5 w-5" />
                 Ver Dashboard
               </Button>
             </Link>
-            <Link href="/analytics">
+            <Link href="/analytics" passHref>
               <Button size="lg" variant="outline" className="text-lg">
                 <TrendingUp className="mr-2 h-5 w-5" />
                 Ver Analytics
@@ -85,6 +101,7 @@ export default function Home() {
           </div>
         </div>
 
+        {/* === Cards de Sugestão/Ação === */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           <Card
             className="hover:shadow-lg transition-all cursor-pointer hover:scale-105"
@@ -147,6 +164,7 @@ export default function Home() {
           </Card>
         </div>
 
+        {/* === Status do Sistema (Health Check) === */}
         <Card className="max-w-2xl mx-auto">
           <CardHeader>
             <CardTitle>Status do Sistema</CardTitle>
@@ -192,6 +210,7 @@ export default function Home() {
           </CardContent>
         </Card>
 
+        {/* === Sobre o Projeto === */}
         <div className="mt-16 text-center max-w-3xl mx-auto">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">
             Sobre o Projeto
@@ -207,6 +226,7 @@ export default function Home() {
         </div>
       </div>
 
+      {/* === Rodapé === */}
       <footer className="bg-white border-t border-gray-200 mt-16">
         <div className="container mx-auto px-4 py-8 text-center text-gray-600">
           <p>🌳 Observa Floresta - Azure Frontier Girls Challenge 2025</p>
