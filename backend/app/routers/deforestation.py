@@ -386,7 +386,7 @@ async def get_available_biomes(
 
 
 # ==========================================
-# NOVO: Comparação de Biomas
+# Ação 4: Comparação de Biomas
 # ==========================================
 
 @router.get(
