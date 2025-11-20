@@ -20,7 +20,6 @@ class DirectService:
         self.use_mock = settings.MOCK_DATA
         logger.info(f"DirectService inicializado (mock_data={self.use_mock})")
         
-        # Escolher qual mock data usar
         if self.use_mock:
             from app.services import mock_data_brazil as mock_data
             self.mock_data = mock_data

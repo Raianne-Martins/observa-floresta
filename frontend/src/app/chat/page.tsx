@@ -76,7 +76,7 @@ export default function ChatPage() {
 📈 Percentual do total: ${data.percentage_of_total.toFixed(1)}%
 🏞️ Bioma: ${data.biome}
 
-**Comparação com ${data.comparison_previous_year.year}:**
+Comparação com ${data.comparison_previous_year.year}:
 ${data.comparison_previous_year.change_km2 < 0 ? '📉' : '📈'} ${data.comparison_previous_year.change_percentage > 0 ? '+' : ''}${data.comparison_previous_year.change_percentage.toFixed(1)}% (${data.comparison_previous_year.change_km2 > 0 ? '+' : ''}${data.comparison_previous_year.change_km2.toFixed(1)} km²)`;
 
           addMessage(response, false);
@@ -117,7 +117,7 @@ ${data.biomes.map((b, idx) =>
 
             const data = await deforestationApi.getRanking(year, 'desc', 10, biome);
 
-            const response = `🏆 **Ranking - ${biome} (${year})**
+            const response = `🏆 Ranking - ${biome} (${year})
 
 ${data.ranking.map(item =>
               `${item.position}º ${item.state} (${item.state_code})
@@ -297,8 +297,8 @@ ${data.ranking
 
         <div className="mt-6 text-center text-sm text-gray-600">
           <p>
-            💡 Dica: Use linguagem natural! Exemplos: &quot;Qual o desmatamento em RO?&quot;
-            ou &quot;Compare PA entre 2020 e 2024&quot;
+            💡 Dica: Use linguagem natural! Exemplos: &quot;Qual o desmatamento em RO em 2023?&quot;
+            ou &quot;Compare PA 2020 e 2023&quot;
           </p>
         </div>
       </div>

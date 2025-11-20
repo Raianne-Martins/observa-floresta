@@ -138,7 +138,7 @@ DEGRADATION_DATA: Dict[str, Dict[int, float]] = {
     # PAMPA (já incluído em RS acima)
 }
 
-# Total Brasil por ano
+
 BRAZIL_TOTAL: Dict[int, float] = {
     2020: sum(data.get(2020, 0) for data in DEGRADATION_DATA.values()),
     2021: sum(data.get(2021, 0) for data in DEGRADATION_DATA.values()),
@@ -147,7 +147,7 @@ BRAZIL_TOTAL: Dict[int, float] = {
     2024: sum(data.get(2024, 0) for data in DEGRADATION_DATA.values()),
 }
 
-# Total por bioma
+
 BIOME_TOTALS: Dict[str, Dict[int, float]] = {}
 for biome in BIOMES:
     BIOME_TOTALS[biome] = {}
@@ -209,7 +209,6 @@ def get_comparison_data(state_or_biome: str, year_start: int, year_end: int) -> 
     if year_start >= year_end:
         raise ValueError("Ano inicial deve ser menor que ano final")
     
-    # Verificar se é Brasil
     if state_or_biome.upper() in ["BRASIL", "BRAZIL"]:
         data_points = []
         for year in range(year_start, year_end + 1):
@@ -223,7 +222,6 @@ def get_comparison_data(state_or_biome: str, year_start: int, year_end: int) -> 
         entity_code = "BR"
         biome = "Todos os biomas"
     
-    # Verificar se é um bioma
     elif state_or_biome.title() in BIOMES or state_or_biome.upper() in [b.upper() for b in BIOMES]:
         biome_name = next((b for b in BIOMES if b.upper() == state_or_biome.upper()), state_or_biome.title())
         
@@ -239,7 +237,6 @@ def get_comparison_data(state_or_biome: str, year_start: int, year_end: int) -> 
         entity_code = biome_name[:3].upper()
         biome = biome_name
     
-    # Senão, é um estado
     else:
         state_name = normalize_state_name(state_or_biome)
         
@@ -296,7 +293,6 @@ def get_ranking_data(year: int, order: str = "desc", limit: int = 10, biome: Opt
     states_data = []
     states_to_include = DEGRADATION_DATA.keys()
     
-    # Filtrar por bioma se especificado
     if biome:
         biome_title = next((b for b in BIOMES if b.upper() == biome.upper()), None)
         if biome_title:
@@ -416,18 +412,16 @@ def normalize_state_name(state: str) -> str:
     """Normaliza nome ou sigla do estado"""
     state = state.strip()
     
-    # Se for sigla
     if len(state) == 2:
         state = state.upper()
         if state in ALL_STATES:
             return ALL_STATES[state]
-    
-    # Se for nome (case insensitive)
+ 
     for code, name in ALL_STATES.items():
         if name.lower() == state.lower():
             return name
     
-    # Match parcial
+ 
     state_lower = state.lower()
     for name in ALL_STATES.values():
         if state_lower in name.lower() or name.lower() in state_lower:

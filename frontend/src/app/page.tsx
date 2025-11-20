@@ -198,11 +198,10 @@ export default function Home() {
           </h2>
           <p className="text-gray-600 leading-relaxed">
             O <strong>Observa Floresta</strong> é um sistema inteligente de monitoramento
-            de desmatamento na Amazônia Legal, desenvolvido como parte do{' '}
+            de desmatamento, desenvolvido como parte do {' '}
             <strong>Azure Frontier Girls - Build Your First Copilot Challenge</strong>.
             Utilizando dados públicos do INPE, IBGE e MapBiomas, oferecemos uma interface
-            intuitiva para consultar, comparar e analisar dados de desmatamento dos 9 estados
-            da Amazônia Legal.
+            intuitiva para consultar, comparar e analisar dados de desmatamento dos biomas brasileiros.
           </p>
         </div>
       </div>
