@@ -66,7 +66,7 @@ Durante desenvolvimento, usar Azure AI Foundry constantemente resultaria em:
 - Pandas 
 
 **Frontend:**
-- Next.js 14 
+- Next.js 16 
 - TypeScript
 - Tailwind CSS
 - Recharts 
@@ -193,7 +193,7 @@ Figura 6. Chat com agent
 ---
 ![Vídeo sem título (2)](https://github.com/user-attachments/assets/45420240-c296-40a7-be1b-c67d5c8c8528)
 <br><br>
-Figura 7. Aplicação Web. 
+Figura 7. Aplicação Web. [Video](docs/Screenshots/aplicacao_web.mp4)
 <br>
 
 ---
