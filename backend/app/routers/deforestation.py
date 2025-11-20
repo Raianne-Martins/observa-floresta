@@ -1,6 +1,6 @@
 """
 Router de Desmatamento
-Endpoints para as 3 ações principais do Observa Floresta
+Endpoints para as ações principais do Observa Floresta
 """
 from fastapi import APIRouter, HTTPException, Depends, Query, status
 from typing import Optional
