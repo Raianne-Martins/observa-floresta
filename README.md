@@ -211,9 +211,10 @@ MIT
 
 Raianne Martins
 
----
+## Referências
 
-**Status**: 🚧 Em desenvolvimento
-```
-
----
+- [Azure AI Foundry](https://learn.microsoft.com/azure/ai-services/)  
+- [Power Automate](https://learn.microsoft.com/power-automate/)  
+- [MapBiomas](https://mapbiomas.org/)  
+- [INPE – TerraBrasilis](http://terrabrasilis.dpi.inpe.br/)  
+- [IBGE](https://www.ibge.gov.br/)  
